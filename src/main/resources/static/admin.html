@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Admin Dashboard</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, proxy-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ===== RESET ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    /* ===== THEME VARIABLES ===== */
+    :root {
+      --bg: #0a0f1f;
+      --text: #e2e8f0;
+      --panel: rgba(2, 6, 23, 0.9);
+      --glass: rgba(15, 23, 42, 0.65);
+      --card: rgba(2, 6, 23, 0.75);
+      --border: rgba(148, 163, 184, 0.15);
+      --link: #38bdf8;
+      --muted: #94a3b8;
+      --btn: rgba(56, 189, 248, 0.15);
+    }
+
+    /* ===== LIGHT THEME ===== */
+    body.light-theme {
+      --bg: #f1f5f9;
+      --text: #0f172a;
+      --panel: rgba(255, 255, 255, 0.85);
+      --glass: rgba(255, 255, 255, 0.7);
+      --card: rgba(255, 255, 255, 0.9);
+      --border: rgba(15, 23, 42, 0.1);
+      --link: #0ea5e9;
+      --muted: #475569;
+      --btn: rgba(14, 165, 233, 0.15);
+    }
+
+    /* ===== BODY ===== */
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    /* ===== SIDEBAR (GLASS) ===== */
+    .sidebar {
+      width: 260px;
+      padding: 26px;
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 8px 0 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar h2 {
+      color: var(--link);
+      margin-bottom: 10px;
+    }
+
+    .sidebar button {
+      padding: 14px 18px;
+      background: var(--btn);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: left;
+    }
+
+    .sidebar button:hover {
+      transform: translateX(6px);
+      background: rgba(56, 189, 248, 0.25);
+    }
+
+    /* ===== CONTENT ===== */
+    .content {
+      flex: 1;
+      padding: 40px 50px;
+      background: transparent;
+      overflow-y: auto;
+    }
+
+    /* ===== SECTION ===== */
+    .section {
+      display: none;
+      max-width: 900px;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== INPUTS (SOFT GLASS) ===== */
+    label {
+      color: var(--muted);
+      font-size: 14px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 18px;
+      transition: 0.25s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--link);
+      box-shadow: 0 0 0 2px var(--btn);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    /* ===== PRIMARY BUTTON ===== */
+    button {
+      background: linear-gradient(135deg, var(--link), #22c55e);
+      color: #020617;
+      padding: 15px 26px;
+      border-radius: 16px;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(56, 189, 248, 0.35);
+    }
+
+    /* ===== LIST / CARD ===== */
+    .row {
+      background: var(--card);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 18px 20px;
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.25s ease;
+    }
+
+    .row:hover {
+      transform: translateY(-2px);
+      border-color: var(--link);
+    }
+
+    /* ===== DELETE BUTTON ===== */
+    .del {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: none;
+    }
+
+    .del:hover {
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    /* ===== TOGGLE BUTTON ===== */
+    .toggle-btn {
+      position: fixed;
+      top: 18px;
+      right: 22px;
+      background: var(--glass);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 100px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .logout-btn {
+      position: fixed;
+      top: 18px;
+      right: 90px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    function checkAuth() {
+      if (!localStorage.getItem("adminAuth")) {
+        window.location.replace("/login.html");
+      }
+    }
+
+    // Run on page load
+    checkAuth();
+
+    // Run when user presses Back/Forward
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted) {
+        checkAuth();
+      }
+    });
+  </script>
+
+  <button class="logout-btn" onclick="logout()">Logout</button>
+  <button class="toggle-btn" onclick="toggleTheme()">+</button>
+  <div class="sidebar">
+    <h2>Admin Panel</h2>
+    <button onclick="show('profile')">Profile</button>
+    <button onclick="show('skills')">Skills</button>
+    <button onclick="show('projects')"> Projects</button>
+  </div>
+
+  <div class="content">
+
+    <!-- PROFILE -->
+    <div id="profile" class="section active">
+      <h2>Profile Settings</h2>
+	  <label>Name</label>
+	  <input id="name" placeholder="Full Name" />
+	  
+      <label>Title</label>
+      <input id="title" placeholder="Professional Title" />
+
+      <label>About</label>
+      <textarea id="about" placeholder="Write about yourself..."></textarea>
+
+      <label>Email</label>
+      <input id="email" placeholder="Email Address" />
+
+      <label>GitHub</label>
+      <input id="github" placeholder="GitHub URL" />
+
+      <label>LinkedIn</label>
+      <input id="linkedin" placeholder="LinkedIn URL" />
+
+	  <button onclick="saveProfile()">Save Profile</button>
+    </div>
+
+    <!-- SKILLS -->
+    <div id="skills" class="section">
+      <h2>Manage Skills</h2>
+
+      <label>New Skill</label>
+      <input id="newSkill" placeholder="e.g. Spring Boot" />
+
+      <button onclick="addSkill()">Add Skill</button>
+
+      <div id="skillsList"></div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div id="projects" class="section">
+      <h2>Manage Projects</h2>
+
+      <label>Project Title</label>
+      <input id="projTitle" placeholder="Project Name" />
+
+      <label>Description</label>
+      <textarea id="projDesc" placeholder="Short project description..."></textarea>
+
+      <button onclick="addProject()">Add Project</button>
+
+      <div id="projectsList"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let dragSrc = null;
+    // Apply saved theme from localStorage
+    function toggleTheme() {
+      document.body.classList.toggle("light-theme");
+    }
+
+    function show(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // ===== Load data =====
+    function loadData() {
+      fetch('/api/admin/data').then(r => r.json()).then(d => {
+        // skills
+        skillsList.innerHTML = '';
+        d.skills.forEach((s, i) => {
+          skillsList.innerHTML += `
+        <div class="row" draggable="true" 
+          ondragstart="startDrag(${i})"
+          ondrop="dropSkill(${i})" 
+          ondragover="allowDrop(event)">
+          <span>${s}</span>
+          <button class="del" onclick="deleteSkill(${i})">Delete</button>
+        </div>`;
+        });
+
+        // projects
+        projectsList.innerHTML = '';
+        d.projects.forEach((p, i) => {
+          projectsList.innerHTML += `
+        <div class="row" draggable="true"
+          ondragstart="startDrag(${i})"
+          ondrop="dropProject(${i})"
+          ondragover="allowDrop(event)">
+          <div>
+            <b>${p.title}</b>
+            <p>${p.description}</p>
+          </div>
+          <button class="del" onclick="deleteProject(${i})">Delete</button>
+        </div>`;
+        });
+      });
+    }
+
+    // ===== Drag & Drop =====
+    function allowDrop(e) { e.preventDefault(); }
+    function startDrag(i) { dragSrc = i; }
+
+    function dropSkill(target) {
+      fetch('/api/admin/data').then(r => r.json()).then(d => {
+        let arr = d.skills;
+        [arr[dragSrc], arr[target]] = [arr[target], arr[dragSrc]];
+
+        fetch('/api/admin/skills/reorder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(arr)
+        }).then(loadData);
+      });
+    }
+
+    function dropProject(target) {
+      fetch('/api/admin/data').then(r => r.json()).then(d => {
+        let arr = d.projects;
+        [arr[dragSrc], arr[target]] = [arr[target], arr[dragSrc]];
+
+        fetch('/api/admin/projects/reorder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(arr)
+        }).then(loadData);
+      });
+    }
+
+    // ===== CRUD =====
+    function addSkill() {
+      fetch('/api/admin/skill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newSkill.value })
+      }).then(() => { newSkill.value = ''; loadData(); });
+    }
+
+    function saveProfile() {
+      debugger
+      fetch('/api/admin/profile/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.value,
+          title: title.value,
+          about: about.value,
+          email: email.value,
+          github: github.value,
+          linkedin: linkedin.value
+         })
+      }).then(() => { 
+		   name='';
+           title='';
+           about='';
+           email='';
+           github='';
+           linkedin='';
+		   loadData();
+	   });
+    }
+
+
+    function deleteSkill(i) {
+      fetch('/api/admin/skill/' + i, { method: 'DELETE' }).then(loadData);
+    }
+
+    function addProject() {
+      fetch('/api/admin/project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: projTitle.value,
+          description: projDesc.value
+        })
+      }).then(() => { projTitle.value = ''; projDesc.value = ''; loadData(); });
+    }
+
+    function deleteProject(i) {
+      fetch('/api/admin/project/' + i, { method: 'DELETE' }).then(loadData);
+    }
+
+    loadData();
+  </script>
+
+</body>
+
+</html>
+<script>
+  const TIMEOUT = 1 * 60 * 1000; // 10 minutes
+
+  let timeoutTimer;
+
+  function resetTimer() {
+    clearTimeout(timeoutTimer);
+    timeoutTimer = setTimeout(() => {
+      alert("Session expired. Please login again.");
+      logout();
+    }, TIMEOUT);
+  }
+
+  function logout() {
+    localStorage.removeItem("adminAuth");
+    window.location.replace("/login.html");
+
+    // Prevent back-page cache
+    document.cookie = "adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = function () {
+      window.history.go(1);
+    };
+  }
+
+  // User activity resets timer
+  window.onload = resetTimer;
+  document.onmousemove = resetTimer;
+  document.onkeypress = resetTimer;
+  document.onclick = resetTimer;
+</script>
